@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('register') }} - HealthCare Chatbot{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-container" style="max-width: 600px;">
+        <div class="card">
+            <div class="card-header" style="justify-content: center;">
+                <i class="fas fa-user-plus" style="font-size: 2rem;"></i>
+            </div>
+            <h2 class="text-center mb-2">{{ t('register') }}</h2>
+            <p class="text-center" style="color: var(--gray-600); margin-bottom: 1.5rem;">
+                Create your account to access all features.
+            </p>
+            
+            <form method="POST" action="{{ url_for('register') }}">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">{{ t('username') }} *</label>
+                        <input type="text" name="username" class="form-control" placeholder="Choose a username" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">{{ t('email') }} *</label>
+                        <input type="email" name="email" class="form-control" placeholder="your@email.com" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">{{ t('name') }} *</label>
+                    <input type="text" name="full_name" class="form-control" placeholder="Enter your full name" required>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">{{ t('age') }}</label>
+                        <input type="number" name="age" class="form-control" placeholder="Your age" min="1" max="150">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">{{ t('gender') }}</label>
+                        <select name="gender" class="form-control">
+                            <option value="">{{ t('select') }}</option>
+                            <option value="male">{{ t('male') }}</option>
+                            <option value="female">{{ t('female') }}</option>
+                            <option value="other">{{ t('other') }}</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">{{ t('password') }} *</label>
+                    <input type="password" name="password" class="form-control" placeholder="Create a password" required minlength="6">
+                    <div class="form-text">Password must be at least 6 characters long.</div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-user-plus"></i> {{ t('register') }}
+                </button>
+            </form>
+            
+            <div class="text-center mt-3">
+                <p style="color: var(--gray-600);">
+                    Already have an account? 
+                    <a href="{{ url_for('login') }}" style="color: var(--primary-color); font-weight: 600;">Login here</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

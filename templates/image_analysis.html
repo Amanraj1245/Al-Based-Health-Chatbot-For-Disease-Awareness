@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+
+{% block title %}AI Image Analysis - HealthCare Chatbot{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-camera"></i>
+            <h2 class="card-title">AI Image Health Analysis</h2>
+        </div>
+        
+        <p style="color: var(--gray-600); margin-bottom: 1.5rem;">
+            Upload images of skin conditions, eye redness, or nail changes for AI analysis. 
+            Our advanced AI will analyze color patterns and provide insights.
+        </p>
+        
+        <!-- Upload Section -->
+        <div class="card" style="background: linear-gradient(135deg, #eff6ff, #dbeafe);">
+            <div class="form-group">
+                <label class="form-label">Select Analysis Type</label>
+                <select id="analysisType" class="form-control">
+                    <option value="general">General Health Assessment</option>
+                    <option value="skin">Skin Condition Analysis</option>
+                    <option value="eye">Eye Health Analysis</option>
+                    <option value="nail">Nail Health Analysis</option>
+                </select>
+            </div>
+            
+            <div class="form-group" style="margin-top: 1rem;">
+                <label class="form-label">Upload Image</label>
+                <div id="dropZone" style="border: 2px dashed var(--primary-color); border-radius: var(--border-radius); padding: 2rem; text-align: center; cursor: pointer; transition: var(--transition);">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+                    <p style="color: var(--gray-600);">Drag & drop an image here or click to browse</p>
+                    <p style="font-size: 0.875rem; color: var(--gray-500);">Supported: JPG, PNG, GIF (Max 10MB)</p>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                </div>
+            </div>
+            
+            <div id="imagePreview" style="display: none; margin-top: 1rem; text-align: center;">
+                <img id="previewImg" style="max-width: 100%; max-height: 300px; border-radius: var(--border-radius); box-shadow: var(--shadow);">
+                <button id="analyzeBtn" class="btn btn-primary btn-lg" style="margin-top: 1rem;">
+                    <i class="fas fa-brain"></i> Analyze with AI
+                </button>
+            </div>
+        </div>
+        
+        <!-- Analysis Results -->
+        <div id="analysisResults" style="display: none; margin-top: 2rem;">
+            <div class="card" style="background: linear-gradient(135deg, #fef3c7, #fde68a);">
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                    <i class="fas fa-robot" style="font-size: 2rem; color: var(--primary-color);"></i>
+                    <h3 style="margin: 0;">AI Analysis Results</h3>
+                </div>
+                
+                <div id="resultsContent"></div>
+            </div>
+        </div>
+        
+        <!-- Comparison Feature -->
+        <div class="card" style="margin-top: 2rem;">
+            <div class="card-header">
+                <i class="fas fa-exchange-alt"></i>
+                <h3 class="card-title">Track Changes Over Time</h3>
+            </div>
+            
+            <p style="color: var(--gray-600); margin-bottom: 1rem;">
+                Upload two images taken at different times to compare and track changes.
+            </p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <label class="form-label">Earlier Image</label>
+                    <input type="file" id="compareImage1" class="form-control" accept="image/*">
+                </div>
+                <div>
+                    <label class="form-label">Recent Image</label>
+                    <input type="file" id="compareImage2" class="form-control" accept="image/*">
+                </div>
+            </div>
+            
+            <button id="compareBtn" class="btn btn-secondary" style="margin-top: 1rem;">
+                <i class="fas fa-balance-scale"></i> Compare Images
+            </button>
+            
+            <div id="comparisonResults" style="display: none; margin-top: 1rem;"></div>
+        </div>
+        
+        <!-- Tips -->
+        <div class="card" style="margin-top: 2rem; background: linear-gradient(135deg, #f0fdf4, #dcfce7);">
+            <h4><i class="fas fa-lightbulb"></i> Tips for Best Results</h4>
+            <ul style="margin-top: 0.75rem; padding-left: 1.5rem;">
+                <li>Use good lighting - natural daylight works best</li>
+                <li>Take photos in focus and close enough to see details</li>
+                <li>Include a size reference (like a coin) for skin conditions</li>
+                <li>Take multiple angles for comprehensive analysis</li>
+                <li>This AI analysis is for informational purposes only - always consult a doctor for diagnosis</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dropZone = document.getElementById('dropZone');
+    const imageInput = document.getElementById('imageInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const analysisResults = document.getElementById('analysisResults');
+    const resultsContent = document.getElementById('resultsContent');
+    
+    // Drag and drop
+    dropZone.addEventListener('click', () => imageInput.click());
+    
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.style.background = 'var(--gray-100)';
+    });
+    
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.style.background = '';
+    });
+    
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.style.background = '';
+        const files = e.dataTransfer.files;
+        if (files.length) {
+            handleImage(files[0]);
+        }
+    });
+    
+    imageInput.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+            handleImage(e.target.files[0]);
+        }
+    });
+    
+    function handleImage(file) {
+        if (!file.type.startsWith('image/')) {
+            alert('Please upload an image file');
+            return;
+        }
+        
+        if (file.size > 10 * 1024 * 1024) {
+            alert('File size must be less than 10MB');
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImg.src = e.target.result;
+            imagePreview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    // Analyze image
+    analyzeBtn.addEventListener('click', async function() {
+        const file = imageInput.files[0];
+        if (!file) return;
+        
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('analysis_type', document.getElementById('analysisType').value);
+        
+        analyzeBtn.disabled = true;
+        analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+        
+        try {
+            const response = await fetch('/api/analyze_image', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            displayResults(data);
+            
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error analyzing image. Please try again.');
+        } finally {
+            analyzeBtn.disabled = false;
+            analyzeBtn.innerHTML = '<i class="fas fa-brain"></i> Analyze with AI';
+        }
+    });
+    
+    function displayResults(data) {
+        let html = '';
+        
+        if (data.success) {
+            // Urgency badge
+            const urgencyColors = {
+                'critical': 'var(--danger-color)',
+                'high': '#f59e0b',
+                'moderate': '#3b82f6',
+                'low': '#10b981'
+            };
+            
+            html += `
+                <div style="margin-bottom: 1rem;">
+                    <span class="badge" style="background: ${urgencyColors[data.urgency_level] || urgencyColors.low}; color: white; font-size: 1rem; padding: 0.5rem 1rem;">
+                        ${data.urgency_level.toUpperCase()} PRIORITY
+                    </span>
+                    <span class="badge badge-info" style="margin-left: 0.5rem;">
+                        Confidence: ${(data.confidence_score * 100).toFixed(0)}%
+                    </span>
+                </div>
+            `;
+            
+            // Findings
+            if (data.findings && data.findings.length > 0) {
+                html += `
+                    <div style="margin-bottom: 1rem;">
+                        <h5><i class="fas fa-search"></i> Findings:</h5>
+                        <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                            ${data.findings.map(f => `<li>${f}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            // Possible conditions
+            if (data.possible_conditions && data.possible_conditions.length > 0) {
+                html += `
+                    <div style="margin-bottom: 1rem;">
+                        <h5><i class="fas fa-stethoscope"></i> Possible Conditions:</h5>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">
+                            ${data.possible_conditions.map(c => `
+                                <span class="badge badge-warning">${c.replace(/_/g, ' ').toUpperCase()}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Recommendations
+            if (data.recommendations && data.recommendations.length > 0) {
+                html += `
+                    <div style="background: white; padding: 1rem; border-radius: var(--border-radius); margin-top: 1rem;">
+                        <h5><i class="fas fa-clipboard-list"></i> AI Recommendations:</h5>
+                        <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                            ${data.recommendations.map(r => `<li>${r}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            // Disclaimer
+            html += `
+                <div style="margin-top: 1rem; padding: 0.75rem; background: #fee2e2; border-radius: var(--border-radius); border-left: 4px solid var(--danger-color);">
+                    <p style="font-size: 0.875rem; color: var(--gray-700); margin: 0;">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i>
+                        <strong>Important:</strong> This AI analysis is for informational purposes only and not a medical diagnosis. Always consult a qualified healthcare professional for proper diagnosis and treatment.
+                    </p>
+                </div>
+            `;
+        } else {
+            html = `
+                <div style="color: var(--danger-color);">
+                    <i class="fas fa-exclamation-circle"></i> ${data.error || 'Analysis failed'}
+                </div>
+            `;
+        }
+        
+        resultsContent.innerHTML = html;
+        analysisResults.style.display = 'block';
+        analysisResults.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Compare images
+    document.getElementById('compareBtn').addEventListener('click', async function() {
+        const file1 = document.getElementById('compareImage1').files[0];
+        const file2 = document.getElementById('compareImage2').files[0];
+        
+        if (!file1 || !file2) {
+            alert('Please select both images to compare');
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('image1', file1);
+        formData.append('image2', file2);
+        
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Comparing...';
+        
+        try {
+            const response = await fetch('/api/compare_images', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            displayComparison(data);
+            
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error comparing images. Please try again.');
+        } finally {
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-balance-scale"></i> Compare Images';
+        }
+    });
+    
+    function displayComparison(data) {
+        const container = document.getElementById('comparisonResults');
+        
+        if (data.success) {
+            let html = `
+                <div class="card" style="background: ${data.significant_change ? '#fee2e2' : '#f0fdf4'};">
+                    <h5><i class="fas fa-chart-bar"></i> Comparison Results</h5>
+                    <p style="margin-top: 0.5rem;">
+                        <strong>Color Change:</strong> ${data.color_change.average_diff.toFixed(1)} units
+                    </p>
+                    <p>
+                        <strong>Significant Change Detected:</strong> 
+                        ${data.significant_change ? '<span style="color: var(--danger-color);">Yes - Consult a doctor</span>' : '<span style="color: var(--secondary-color);">No significant change</span>'}
+                    </p>
+                    ${data.conditions_changed ? '<p style="color: var(--warning-color);"><i class="fas fa-exclamation-triangle"></i> Conditions appear to have changed</p>' : ''}
+                    <p style="margin-top: 0.5rem; font-style: italic;">${data.recommendation}</p>
+                </div>
+            `;
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = `<div style="color: var(--danger-color);">${data.error}</div>`;
+        }
+        
+        container.style.display = 'block';
+    }
+});
+</script>
+{% endblock %}

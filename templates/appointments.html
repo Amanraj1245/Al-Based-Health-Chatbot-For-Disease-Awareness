@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('appointments') }} - HealthCare Chatbot{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Book Appointment Section -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-calendar-plus"></i>
+            <h2 class="card-title">{{ t('book_appointment') }}</h2>
+        </div>
+        
+        <form method="POST" action="{{ url_for('appointments') }}">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                <div class="form-group">
+                    <label class="form-label">{{ t('select_date') }} *</label>
+                    <input type="date" name="appointment_date" class="form-control" required min="{{ today }}">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">{{ t('select_time') }} *</label>
+                    <input type="time" name="appointment_time" class="form-control" required>
+                </div>
+                
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label class="form-label">Select Doctor *</label>
+                    <div class="features-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+                        {% for doctor in doctors %}
+                        <label style="cursor: pointer;">
+                            <input type="radio" name="doctor_id" value="{{ doctor.id }}" required style="display: none;">
+                            <div class="card doctor-card" style="border: 2px solid var(--gray-200); transition: all 0.3s;">
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary-color), var(--info-color)); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-user-md" style="color: white; font-size: 1.5rem;"></i>
+                                    </div>
+                                    <div>
+                                        <h4 style="margin: 0; color: var(--gray-800);">{{ doctor.name }}</h4>
+                                        <p style="margin: 0; color: var(--primary-color); font-weight: 600;">{{ doctor.specialty }}</p>
+                                        <p style="margin: 0; font-size: 0.875rem; color: var(--gray-500);">
+                                            <i class="fas fa-hospital"></i> {{ doctor.hospital }}
+                                        </p>
+                                        <p style="margin: 0; font-size: 0.875rem; color: var(--gray-500);">
+                                            <i class="fas fa-clock"></i> {{ doctor.timing }}
+                                        </p>
+                                        <p style="margin: 0; font-size: 0.875rem; color: var(--gray-500);">
+                                            <i class="fas fa-star"></i> {{ doctor.experience }} experience
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label class="form-label">Notes (Optional)</label>
+                    <textarea name="notes" class="form-control" rows="3" placeholder="Any specific concerns or symptoms you want to discuss..."></textarea>
+                </div>
+            </div>
+            
+            <div style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-calendar-check"></i> {{ t('book_appointment') }}
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- My Appointments Section -->
+    <div class="card" style="margin-top: 2rem;">
+        <div class="card-header">
+            <i class="fas fa-list-alt"></i>
+            <h2 class="card-title">My Appointments</h2>
+        </div>
+        
+        {% if appointments %}
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>{{ t('doctor_name') }}</th>
+                        <th>{{ t('specialty') }}</th>
+                        <th>{{ t('date') }}</th>
+                        <th>{{ t('select_time') }}</th>
+                        <th>{{ t('status') }}</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appointment in appointments %}
+                    <tr>
+                        <td><strong>{{ appointment.doctor_name }}</strong></td>
+                        <td>{{ appointment.specialty }}</td>
+                        <td>{{ appointment.appointment_date.strftime('%d %b %Y') }}</td>
+                        <td>{{ appointment.appointment_time.strftime('%I:%M %p') }}</td>
+                        <td>
+                            <span class="badge badge-{{ appointment.status }}">
+                                {{ appointment.status.capitalize() }}
+                            </span>
+                        </td>
+                        <td>{{ appointment.notes or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 3rem; color: var(--gray-500);">
+            <i class="fas fa-calendar-times" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+            <p>No appointments booked yet.</p>
+            <p style="font-size: 0.875rem;">Book your first appointment above!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set today's date as minimum
+    const dateInput = document.querySelector('input[type="date"]');
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.setAttribute('min', today);
+    
+    // Doctor card selection
+    const doctorCards = document.querySelectorAll('.doctor-card');
+    const radioInputs = document.querySelectorAll('input[name="doctor_id"]');
+    
+    radioInputs.forEach((radio, index) => {
+        radio.addEventListener('change', function() {
+            doctorCards.forEach(card => {
+                card.style.borderColor = 'var(--gray-200)';
+                card.style.backgroundColor = 'white';
+            });
+            if (this.checked) {
+                doctorCards[index].style.borderColor = 'var(--primary-color)';
+                doctorCards[index].style.backgroundColor = '#eff6ff';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

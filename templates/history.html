@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('history') }} - HealthCare Chatbot{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-history"></i>
+            <h2 class="card-title">{{ t('chat_history') }}</h2>
+        </div>
+        
+        <p style="color: var(--gray-600); margin-bottom: 1.5rem;">
+            Review your previous conversations with the AI health assistant. This helps you track your health concerns over time.
+        </p>
+        
+        {% if history %}
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>{{ t('date') }}</th>
+                        <th>{{ t('message') }}</th>
+                        <th>{{ t('response') }}</th>
+                        <th>Language</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for chat in history %}
+                    <tr>
+                        <td style="white-space: nowrap;">
+                            <i class="fas fa-calendar" style="color: var(--gray-400); margin-right: 0.5rem;"></i>
+                            {{ chat.timestamp.strftime('%d %b %Y') }}
+                            <br>
+                            <small style="color: var(--gray-500);">{{ chat.timestamp.strftime('%I:%M %p') }}</small>
+                        </td>
+                        <td>
+                            <div style="max-width: 250px;">
+                                <span class="badge badge-low" style="margin-bottom: 0.5rem;">You</span>
+                                <p style="margin: 0; color: var(--gray-700);">{{ chat.message[:100] }}{% if chat.message|length > 100 %}...{% endif %}</p>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="max-width: 400px;">
+                                <span class="badge badge-confirmed" style="margin-bottom: 0.5rem;">AI Assistant</span>
+                                <p style="margin: 0; color: var(--gray-700); white-space: pre-line;">{{ chat.response[:150] }}{% if chat.response|length > 150 %}...{% endif %}</p>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ 'confirmed' if chat.language == 'en' else 'pending' }}">
+                                {{ chat.language.upper() }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Statistics -->
+        <div class="card" style="margin-top: 2rem; background: linear-gradient(135deg, #eff6ff, #dbeafe);">
+            <div class="card-header">
+                <i class="fas fa-chart-bar" style="color: var(--primary-color);"></i>
+                <h3 class="card-title">Conversation Statistics</h3>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                <div style="text-align: center; padding: 1rem; background-color: white; border-radius: var(--border-radius);">
+                    <div style="font-size: 2rem; font-weight: 800; color: var(--primary-color);">{{ history|length }}</div>
+                    <div style="color: var(--gray-600);">Total Conversations</div>
+                </div>
+                <div style="text-align: center; padding: 1rem; background-color: white; border-radius: var(--border-radius);">
+                    <div style="font-size: 2rem; font-weight: 800; color: var(--secondary-color);">
+                        {{ history|selectattr("language", "equalto", "en")|list|length }}
+                    </div>
+                    <div style="color: var(--gray-600);">English</div>
+                </div>
+                <div style="text-align: center; padding: 1rem; background-color: white; border-radius: var(--border-radius);">
+                    <div style="font-size: 2rem; font-weight: 800; color: var(--warning-color);">
+                        {{ history|selectattr("language", "equalto", "hi")|list|length }}
+                    </div>
+                    <div style="color: var(--gray-600);">Hindi</div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 4rem; color: var(--gray-500);">
+            <i class="fas fa-comments" style="font-size: 4rem; margin-bottom: 1.5rem; color: var(--gray-300);"></i>
+            <h3 style="margin-bottom: 0.5rem;">No Chat History</h3>
+            <p>You haven't had any conversations with the AI assistant yet.</p>
+            <a href="{{ url_for('chatbot') }}" class="btn btn-primary" style="margin-top: 1rem;">
+                <i class="fas fa-robot"></i> Start Chatting
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

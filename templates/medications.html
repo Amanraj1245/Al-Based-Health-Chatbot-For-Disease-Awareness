@@ -1,0 +1,405 @@
+{% extends "base.html" %}
+
+{% block title %}Medication Manager - HealthCare Chatbot{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-pills"></i>
+            <h2 class="card-title">AI Medication Manager</h2>
+        </div>
+        
+        <!-- Today's Schedule -->
+        <div class="card" style="background: linear-gradient(135deg, #eff6ff, #dbeafe); margin-bottom: 1.5rem;">
+            <div class="card-header">
+                <i class="fas fa-calendar-day"></i>
+                <h3 class="card-title">Today's Schedule</h3>
+            </div>
+            
+            <div id="todaySchedule">
+                <p style="color: var(--gray-500);">Loading schedule...</p>
+            </div>
+        </div>
+        
+        <!-- Adherence Stats -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+                <i class="fas fa-chart-line"></i>
+                <h3 class="card-title">Adherence Statistics</h3>
+            </div>
+            
+            <div id="adherenceStats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                <div style="text-align: center; padding: 1rem; background: var(--gray-50); border-radius: var(--border-radius);">
+                    <div style="font-size: 2rem; font-weight: 800; color: var(--primary-color);" id="adherenceRate">--%</div>
+                    <div style="color: var(--gray-600);">Adherence Rate</div>
+                </div>
+                <div style="text-align: center; padding: 1rem; background: var(--gray-50); border-radius: var(--border-radius);">
+                    <div style="font-size: 2rem; font-weight: 800; color: var(--secondary-color);" id="takenDoses">--</div>
+                    <div style="color: var(--gray-600);">Doses Taken</div>
+                </div>
+                <div style="text-align: center; padding: 1rem; background: var(--gray-50); border-radius: var(--border-radius);">
+                    <div style="font-size: 2rem; font-weight: 800; color: var(--warning-color);" id="missedDoses">--</div>
+                    <div style="color: var(--gray-600);">Missed</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Add Medication -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+                <i class="fas fa-plus-circle"></i>
+                <h3 class="card-title">Add New Medication</h3>
+            </div>
+            
+            <form id="addMedicationForm">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Medication Name</label>
+                        <input type="text" id="medName" class="form-control" placeholder="e.g., Paracetamol" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Dosage</label>
+                        <input type="text" id="medDosage" class="form-control" placeholder="e.g., 500mg" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Frequency</label>
+                        <select id="medFrequency" class="form-control">
+                            <option value="once">Once daily</option>
+                            <option value="twice">Twice daily</option>
+                            <option value="thrice">Three times daily</option>
+                            <option value="four">Four times daily</option>
+                            <option value="as_needed">As needed</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Time(s) - comma separated (24hr format)</label>
+                        <input type="text" id="medTimes" class="form-control" placeholder="e.g., 08:00, 20:00" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" id="medStartDate" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">End Date (optional)</label>
+                        <input type="date" id="medEndDate" class="form-control">
+                    </div>
+                </div>
+                
+                <div style="margin-top: 1rem;">
+                    <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="medWithFood">
+                        Take with food
+                    </label>
+                </div>
+                
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label class="form-label">Notes</label>
+                    <textarea id="medNotes" class="form-control" rows="2" placeholder="Any special instructions..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+                    <i class="fas fa-plus"></i> Add Medication
+                </button>
+            </form>
+        </div>
+        
+        <!-- My Medications -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-list"></i>
+                <h3 class="card-title">My Medications</h3>
+            </div>
+            
+            <div id="myMedications">
+                <p style="color: var(--gray-500);">Loading medications...</p>
+            </div>
+        </div>
+        
+        <!-- Refill Reminders -->
+        <div class="card" style="margin-top: 1.5rem;">
+            <div class="card-header">
+                <i class="fas fa-bell"></i>
+                <h3 class="card-title">Refill Reminders</h3>
+            </div>
+            
+            <div id="refillReminders">
+                <p style="color: var(--gray-500);">No refill reminders</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set default start date to today
+    document.getElementById('medStartDate').valueAsDate = new Date();
+    
+    // Load all data
+    loadTodaySchedule();
+    loadAdherenceStats();
+    loadMyMedications();
+    loadRefillReminders();
+    
+    // Form submission
+    document.getElementById('addMedicationForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const data = {
+            name: document.getElementById('medName').value,
+            dosage: document.getElementById('medDosage').value,
+            frequency: document.getElementById('medFrequency').value,
+            times: document.getElementById('medTimes').value.split(',').map(t => t.trim()),
+            start_date: document.getElementById('medStartDate').value,
+            end_date: document.getElementById('medEndDate').value || null,
+            with_food: document.getElementById('medWithFood').checked,
+            notes: document.getElementById('medNotes').value
+        };
+        
+        try {
+            const response = await fetch('/api/add_medication', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                alert(result.message);
+                if (result.interactions && result.interactions.length > 0) {
+                    let warning = 'Drug Interactions Detected:\n\n';
+                    result.interactions.forEach(i => {
+                        warning += `${i.medication1} + ${i.medication2}: ${i.severity.toUpperCase()}\n${i.recommendation}\n\n`;
+                    });
+                    alert(warning);
+                }
+                
+                // Reset form and reload
+                this.reset();
+                document.getElementById('medStartDate').valueAsDate = new Date();
+                loadTodaySchedule();
+                loadMyMedications();
+            } else {
+                alert('Error: ' + result.error);
+            }
+            
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        }
+    });
+});
+
+async function loadTodaySchedule() {
+    try {
+        const response = await fetch('/api/today_schedule');
+        const data = await response.json();
+        
+        const container = document.getElementById('todaySchedule');
+        
+        if (data.schedule && data.schedule.length > 0) {
+            let html = '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
+            
+            data.schedule.forEach(item => {
+                const statusClass = item.taken ? 'badge-success' : item.overdue ? 'badge-high' : 'badge-medium';
+                const statusText = item.taken ? 'Taken' : item.overdue ? 'Overdue' : 'Pending';
+                
+                html += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: white; border-radius: var(--border-radius); ${item.overdue && !item.taken ? 'border: 2px solid var(--danger-color);' : ''}">
+                        <div>
+                            <strong>${item.name}</strong> - ${item.dosage}
+                            <div style="font-size: 0.875rem; color: var(--gray-600);">
+                                ${item.time} ${item.with_food ? '(with food)' : ''}
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="badge ${statusClass}">${statusText}</span>
+                            ${!item.taken ? `
+                                <button class="btn btn-sm btn-success" onclick="markTaken(${item.medication_id}, '${item.time}')">
+                                    <i class="fas fa-check"></i> Take
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = '<p style="color: var(--gray-500);">No medications scheduled for today</p>';
+        }
+        
+    } catch (error) {
+        console.error('Error loading schedule:', error);
+    }
+}
+
+async function loadAdherenceStats() {
+    try {
+        const response = await fetch('/api/adherence_stats');
+        const data = await response.json();
+        
+        if (data.status !== 'no_medications') {
+            document.getElementById('adherenceRate').textContent = data.adherence_rate + '%';
+            document.getElementById('takenDoses').textContent = data.taken_doses;
+            document.getElementById('missedDoses').textContent = data.missed_doses;
+            
+            // Color code adherence rate
+            const rateEl = document.getElementById('adherenceRate');
+            if (data.adherence_rate >= 90) {
+                rateEl.style.color = 'var(--secondary-color)';
+            } else if (data.adherence_rate >= 80) {
+                rateEl.style.color = 'var(--warning-color)';
+            } else {
+                rateEl.style.color = 'var(--danger-color)';
+            }
+        } else {
+            document.getElementById('adherenceStats').innerHTML = 
+                '<p style="color: var(--gray-500);">Add medications to see adherence statistics</p>';
+        }
+        
+    } catch (error) {
+        console.error('Error loading stats:', error);
+    }
+}
+
+async function loadMyMedications() {
+    try {
+        const response = await fetch('/api/my_medications');
+        const data = await response.json();
+        
+        const container = document.getElementById('myMedications');
+        
+        if (data.medications && data.medications.length > 0) {
+            let html = '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
+            
+            data.medications.forEach(med => {
+                html += `
+                    <div style="padding: 1rem; background: var(--gray-50); border-radius: var(--border-radius);">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <strong style="font-size: 1.1rem;">${med.name}</strong>
+                                <div style="color: var(--gray-600); margin-top: 0.25rem;">
+                                    ${med.dosage} - ${med.frequency}
+                                </div>
+                                <div style="font-size: 0.875rem; color: var(--gray-500); margin-top: 0.25rem;">
+                                    Times: ${med.times.join(', ')} | 
+                                    ${med.with_food ? 'With food' : 'Without food'}
+                                </div>
+                                ${med.notes ? `<div style="font-size: 0.875rem; color: var(--gray-600); margin-top: 0.5rem; font-style: italic;">${med.notes}</div>` : ''}
+                            </div>
+                            <button class="btn btn-sm btn-danger" onclick="deleteMedication(${med.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = '<p style="color: var(--gray-500);">No medications added yet</p>';
+        }
+        
+    } catch (error) {
+        console.error('Error loading medications:', error);
+    }
+}
+
+async function loadRefillReminders() {
+    try {
+        const response = await fetch('/api/refill_reminders');
+        const data = await response.json();
+        
+        const container = document.getElementById('refillReminders');
+        
+        if (data.reminders && data.reminders.length > 0) {
+            let html = '<div style="display: flex; flex-direction: column; gap: 0.5rem;">';
+            
+            data.reminders.forEach(reminder => {
+                html += `
+                    <div style="padding: 0.75rem; background: #fef3c7; border-radius: var(--border-radius); border-left: 4px solid var(--warning-color);">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--warning-color);"></i>
+                        ${reminder.message}
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = '<p style="color: var(--gray-500);">No refill reminders at this time</p>';
+        }
+        
+    } catch (error) {
+        console.error('Error loading reminders:', error);
+    }
+}
+
+async function markTaken(medicationId, time) {
+    try {
+        const response = await fetch('/api/mark_dose_taken', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                medication_id: medicationId,
+                time: time
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            loadTodaySchedule();
+            loadAdherenceStats();
+            
+            if (data.streak > 0) {
+                alert(`Great job! Current streak: ${data.streak} days`);
+            }
+        }
+        
+    } catch (error) {
+        console.error('Error marking dose:', error);
+    }
+}
+
+async function deleteMedication(medicationId) {
+    if (!confirm('Are you sure you want to remove this medication?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/delete_medication', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ medication_id: medicationId })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            loadTodaySchedule();
+            loadMyMedications();
+            loadAdherenceStats();
+        }
+        
+    } catch (error) {
+        console.error('Error deleting medication:', error);
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('chatbot') }} - HealthCare Chatbot{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1000px;">
+    <div class="chat-container">
+        <div class="chat-header">
+            <i class="fas fa-robot"></i>
+            <div>
+                <h2>AI Health Assistant</h2>
+                <p style="font-size: 0.875rem; opacity: 0.9;">Ask me about your symptoms in English or Hindi</p>
+            </div>
+            <div class="chat-status">
+                <span class="status-dot"></span>
+                <span>Online</span>
+            </div>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                <div class="message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">
+                    <p>Hey {{ current_user.full_name }}! 👋</p>
+                    <p>I'm your personal health companion. I'm here to chat about how you're feeling and help you figure things out. Whether it's a symptom, health question, or just need some advice - I'm all ears! 😊</p>
+                    <p style="margin-top: 0.5rem; font-size: 0.875rem; opacity: 0.8;">
+                        💬 You can talk to me naturally, like chatting with a friend. I understand both English and Hindi!
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-input-container">
+            <button id="voiceBtn" class="chat-voice-btn" title="Voice Input">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <input type="text" id="messageInput" class="chat-input" placeholder="{{ t('type_message') }}" autocomplete="off">
+            <button id="sendBtn" class="chat-send-btn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+        <div id="voiceStatus" style="text-align: center; padding: 0.5rem; color: var(--gray-500); font-size: 0.875rem; display: none;">
+            <i class="fas fa-microphone-alt" style="color: var(--danger-color); animation: pulse 1s infinite;"></i>
+            Listening... Speak now
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatMessages = document.getElementById('chatMessages');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    function addMessage(text, isUser = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+        
+        const avatarDiv = document.createElement('div');
+        avatarDiv.className = 'message-avatar';
+        avatarDiv.innerHTML = `<i class="fas fa-${isUser ? 'user' : 'robot'}"></i>`;
+        
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'message-content';
+        
+        // Convert newlines to <br> tags
+        const formattedText = text.replace(/\n/g, '<br>');
+        contentDiv.innerHTML = `<p>${formattedText}</p>`;
+        
+        messageDiv.appendChild(avatarDiv);
+        messageDiv.appendChild(contentDiv);
+        chatMessages.appendChild(messageDiv);
+        
+        scrollToBottom();
+    }
+    
+    function showTypingIndicator() {
+        const indicator = document.createElement('div');
+        indicator.className = 'message bot typing-indicator';
+        indicator.id = 'typingIndicator';
+        indicator.innerHTML = `
+            <div class="message-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="message-content" style="display: flex; gap: 0.5rem; align-items: center;">
+                <div class="loading"></div>
+                <span style="color: var(--gray-500);">Typing...</span>
+            </div>
+        `;
+        chatMessages.appendChild(indicator);
+        scrollToBottom();
+    }
+    
+    function hideTypingIndicator() {
+        const indicator = document.getElementById('typingIndicator');
+        if (indicator) {
+            indicator.remove();
+        }
+    }
+    
+    async function sendMessage() {
+        const message = messageInput.value.trim();
+        if (!message) return;
+        
+        // Add user message
+        addMessage(message, true);
+        messageInput.value = '';
+        
+        // Show typing indicator
+        showTypingIndicator();
+        
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message })
+            });
+            
+            const data = await response.json();
+            
+            // Hide typing indicator and add bot response
+            hideTypingIndicator();
+            addMessage(data.response);
+            
+        } catch (error) {
+            hideTypingIndicator();
+            addMessage('Sorry, I encountered an error. Please try again.');
+            console.error('Error:', error);
+        }
+    }
+    
+    sendBtn.addEventListener('click', sendMessage);
+    
+    messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+    
+    // Voice recognition setup
+    const voiceBtn = document.getElementById('voiceBtn');
+    const voiceStatus = document.getElementById('voiceStatus');
+    let recognition = null;
+    let isListening = false;
+    
+    // Check if browser supports speech recognition
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+        
+        recognition.onstart = function() {
+            isListening = true;
+            voiceStatus.style.display = 'block';
+            voiceBtn.innerHTML = '<i class="fas fa-stop"></i>';
+            voiceBtn.style.background = 'var(--danger-color)';
+            voiceBtn.style.color = 'white';
+        };
+        
+        recognition.onend = function() {
+            isListening = false;
+            voiceStatus.style.display = 'none';
+            voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+            voiceBtn.style.background = '';
+            voiceBtn.style.color = '';
+        };
+        
+        recognition.onresult = function(event) {
+            let finalTranscript = '';
+            let interimTranscript = '';
+            
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const transcript = event.results[i][0].transcript;
+                if (event.results[i].isFinal) {
+                    finalTranscript += transcript;
+                } else {
+                    interimTranscript += transcript;
+                }
+            }
+            
+            if (finalTranscript) {
+                messageInput.value = finalTranscript;
+                sendMessage();
+            } else if (interimTranscript) {
+                messageInput.value = interimTranscript;
+            }
+        };
+        
+        recognition.onerror = function(event) {
+            console.error('Speech recognition error:', event.error);
+            hideTypingIndicator();
+            addMessage('Sorry, I couldn\'t understand. Please try speaking more clearly or type your message.');
+            isListening = false;
+            voiceStatus.style.display = 'none';
+            voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+        };
+        
+        voiceBtn.addEventListener('click', function() {
+            if (isListening) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        });
+    } else {
+        voiceBtn.style.display = 'none';
+        console.log('Speech recognition not supported in this browser');
+    }
+    
+    // Focus input on load
+    messageInput.focus();
+});
+</script>
+{% endblock %}

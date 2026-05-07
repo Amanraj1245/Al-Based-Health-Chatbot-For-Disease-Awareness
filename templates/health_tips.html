@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('health_tips') }} - HealthCare Chatbot{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-lightbulb"></i>
+            <h2 class="card-title">{{ t('health_tips') }}</h2>
+        </div>
+        
+        <p style="color: var(--gray-600); margin-bottom: 1.5rem;">
+            Daily health tips to help you maintain a healthy lifestyle. Small changes can make a big difference!
+        </p>
+        
+        <!-- Diet Tips -->
+        <div class="tips-category">
+            <h3>
+                <i class="fas fa-utensils"></i> Diet & Nutrition
+            </h3>
+            <div class="tips-grid">
+                {% for tip in tips.diet %}
+                <div class="tip-card">
+                    <i class="fas fa-check-circle"></i>
+                    {{ tip.get(lang, tip.get('en')) }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Exercise Tips -->
+        <div class="tips-category">
+            <h3>
+                <i class="fas fa-running"></i> Exercise & Fitness
+            </h3>
+            <div class="tips-grid">
+                {% for tip in tips.exercise %}
+                <div class="tip-card">
+                    <i class="fas fa-check-circle"></i>
+                    {{ tip.get(lang, tip.get('en')) }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Sleep Tips -->
+        <div class="tips-category">
+            <h3>
+                <i class="fas fa-bed"></i> Sleep & Rest
+            </h3>
+            <div class="tips-grid">
+                {% for tip in tips.sleep %}
+                <div class="tip-card">
+                    <i class="fas fa-check-circle"></i>
+                    {{ tip.get(lang, tip.get('en')) }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Daily Health Checklist -->
+    <div class="card" style="margin-top: 2rem;">
+        <div class="card-header">
+            <i class="fas fa-clipboard-check" style="color: var(--secondary-color);"></i>
+            <h2 class="card-title">Daily Health Checklist</h2>
+        </div>
+        
+        <div class="features-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+            <div class="card" style="background: linear-gradient(135deg, #f0fdf4, #dcfce7);">
+                <h4 style="color: #166534; margin-bottom: 1rem;">
+                    <i class="fas fa-sun"></i> Morning Routine
+                </h4>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--secondary-color); margin-right: 0.5rem;"></i> Drink warm water</li>
+                    <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--secondary-color); margin-right: 0.5rem;"></i> Stretch for 5 minutes</li>
+                    <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--secondary-color); margin-right: 0.5rem;"></i> Eat a healthy breakfast</li>
+                    <li><i class="fas fa-check" style="color: var(--secondary-color); margin-right: 0.5rem;"></i> Plan your day</li>
+                </ul>
+            </div>
+            
+            <div class="card" style="background: linear-gradient(135deg, #eff6ff, #dbeafe);">
+                <h4 style="color: #1e40af; margin-bottom: 1rem;">
+                    <i class="fas fa-sun" style="transform: rotate(90deg);"></i> Throughout the Day
+                </h4>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--primary-color); margin-right: 0.5rem;"></i> Stay hydrated (8 glasses)</li>
+                    <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--primary-color); margin-right: 0.5rem;"></i> Take screen breaks</li>
+                    <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--primary-color); margin-right: 0.5rem;"></i> Eat fruits & vegetables</li>
+                    <li><i class="fas fa-check" style="color: var(--primary-color); margin-right: 0.5rem;"></i> Walk for 30 minutes</li>
+                </ul>
+            </div>
+            
+            <div class="card" style="background: linear-gradient(135deg, #faf5ff, #f3e8ff);">
+                <h4 style="color: #6b21a8; margin-bottom: 1rem;">
+                    <i class="fas fa-moon"></i> Evening Routine
+                </h4>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: #8b5cf6; margin-right: 0.5rem;"></i> Light dinner before 8 PM</li>
+                    <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: #8b5cf6; margin-right: 0.5rem;"></i> Avoid screens 1 hour before bed</li>
+                    <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: #8b5cf6; margin-right: 0.5rem;"></i> Practice meditation</li>
+                    <li><i class="fas fa-check" style="color: #8b5cf6; margin-right: 0.5rem;"></i> Sleep for 7-8 hours</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- BMI Calculator -->
+    <div class="card" style="margin-top: 2rem;">
+        <div class="card-header">
+            <i class="fas fa-calculator" style="color: var(--warning-color);"></i>
+            <h2 class="card-title">BMI Calculator</h2>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+            <div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Height (cm)</label>
+                        <input type="number" id="height" class="form-control" placeholder="e.g., 170">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Weight (kg)</label>
+                        <input type="number" id="weight" class="form-control" placeholder="e.g., 70">
+                    </div>
+                </div>
+                <button onclick="calculateBMI()" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-calculator"></i> Calculate BMI
+                </button>
+            </div>
+            
+            <div id="bmiResult" style="display: none;">
+                <div style="background-color: var(--gray-50); padding: 1.5rem; border-radius: var(--border-radius); text-align: center;">
+                    <p style="color: var(--gray-600); margin-bottom: 0.5rem;">Your BMI</p>
+                    <div id="bmiValue" style="font-size: 3rem; font-weight: 800; color: var(--primary-color);"></div>
+                    <div id="bmiCategory" style="font-size: 1.25rem; font-weight: 600; margin-top: 0.5rem;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 1.5rem;">
+            <h4>BMI Categories:</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                <div style="padding: 1rem; background-color: #dbeafe; border-radius: var(--border-radius); text-align: center;">
+                    <strong>Underweight</strong>
+                    <p style="margin: 0; color: var(--gray-600);">&lt; 18.5</p>
+                </div>
+                <div style="padding: 1rem; background-color: #d1fae5; border-radius: var(--border-radius); text-align: center;">
+                    <strong>Normal</strong>
+                    <p style="margin: 0; color: var(--gray-600);">18.5 - 24.9</p>
+                </div>
+                <div style="padding: 1rem; background-color: #fef3c7; border-radius: var(--border-radius); text-align: center;">
+                    <strong>Overweight</strong>
+                    <p style="margin: 0; color: var(--gray-600);">25 - 29.9</p>
+                </div>
+                <div style="padding: 1rem; background-color: #fee2e2; border-radius: var(--border-radius); text-align: center;">
+                    <strong>Obese</strong>
+                    <p style="margin: 0; color: var(--gray-600);">≥ 30</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function calculateBMI() {
+    const height = parseFloat(document.getElementById('height').value);
+    const weight = parseFloat(document.getElementById('weight').value);
+    
+    if (!height || !weight) {
+        alert('Please enter both height and weight');
+        return;
+    }
+    
+    // Calculate BMI
+    const heightInMeters = height / 100;
+    const bmi = weight / (heightInMeters * heightInMeters);
+    const bmiRounded = bmi.toFixed(1);
+    
+    // Determine category
+    let category = '';
+    let color = '';
+    
+    if (bmi < 18.5) {
+        category = 'Underweight';
+        color = '#3b82f6';
+    } else if (bmi < 25) {
+        category = 'Normal Weight';
+        color = '#10b981';
+    } else if (bmi < 30) {
+        category = 'Overweight';
+        color = '#f59e0b';
+    } else {
+        category = 'Obese';
+        color = '#ef4444';
+    }
+    
+    // Display result
+    document.getElementById('bmiResult').style.display = 'block';
+    document.getElementById('bmiValue').textContent = bmiRounded;
+    document.getElementById('bmiValue').style.color = color;
+    document.getElementById('bmiCategory').textContent = category;
+    document.getElementById('bmiCategory').style.color = color;
+}
+</script>
+{% endblock %}

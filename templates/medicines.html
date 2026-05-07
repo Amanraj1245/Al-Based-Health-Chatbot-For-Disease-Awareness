@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('medicines') }} - HealthCare Chatbot{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-pills"></i>
+            <h2 class="card-title">{{ t('medicines') }}</h2>
+        </div>
+        
+        <div style="background-color: #fef3c7; border-left: 4px solid var(--warning-color); padding: 1rem; border-radius: var(--border-radius); margin-bottom: 1.5rem;">
+            <p style="margin: 0; color: #92400e;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Important Warning:</strong> {{ t('doctor_warning') }}
+            </p>
+        </div>
+        
+        <p style="color: var(--gray-600); margin-bottom: 1.5rem;">
+            Information about common over-the-counter (OTC) medicines. Always read the label and consult a pharmacist or doctor before taking any medication.
+        </p>
+        
+        <!-- Medicines Grid -->
+        <div class="features-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+            {% for med_key, med_data in medicines_db.items() %}
+            {% set med = med_data.get(lang, med_data.get('en')) %}
+            <div class="card" style="border: 1px solid var(--gray-200);">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-pills" style="color: white; font-size: 1.5rem;"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; color: var(--gray-800);">{{ med.name }}</h3>
+                        <span class="badge badge-low" style="margin-top: 0.25rem;">OTC Medicine</span>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <strong style="color: var(--gray-700);"><i class="fas fa-clipboard-list" style="color: var(--primary-color); margin-right: 0.5rem;"></i>Usage:</strong>
+                    <p style="margin: 0.25rem 0 0 0; color: var(--gray-600);">{{ med.usage }}</p>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <strong style="color: var(--gray-700);"><i class="fas fa-clock" style="color: var(--primary-color); margin-right: 0.5rem;"></i>Dosage:</strong>
+                    <p style="margin: 0.25rem 0 0 0; color: var(--gray-600);">{{ med.dosage }}</p>
+                </div>
+                
+                <div style="background-color: #fee2e2; padding: 0.75rem; border-radius: var(--border-radius); border-left: 3px solid var(--danger-color);">
+                    <strong style="color: #991b1b; font-size: 0.875rem;"><i class="fas fa-exclamation-circle" style="margin-right: 0.5rem;"></i>Warning:</strong>
+                    <p style="margin: 0.25rem 0 0 0; color: #991b1b; font-size: 0.875rem;">{{ med.warning }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Additional Info -->
+        <div class="card" style="margin-top: 2rem; background-color: #eff6ff; border: 1px solid #93c5fd;">
+            <div class="card-header">
+                <i class="fas fa-info-circle" style="color: var(--primary-color);"></i>
+                <h3 class="card-title">General Medicine Guidelines</h3>
+            </div>
+            <ul style="padding-left: 1.5rem; color: var(--gray-700);">
+                <li style="margin-bottom: 0.5rem;">Always read the medicine label before use</li>
+                <li style="margin-bottom: 0.5rem;">Do not exceed the recommended dosage</li>
+                <li style="margin-bottom: 0.5rem;">Keep medicines out of reach of children</li>
+                <li style="margin-bottom: 0.5rem;">Store medicines in a cool, dry place</li>
+                <li style="margin-bottom: 0.5rem;">Check expiry dates before use</li>
+                <li style="margin-bottom: 0.5rem;">Consult a doctor if symptoms persist for more than 3 days</li>
+                <li>Inform your doctor about any allergies or existing medications</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

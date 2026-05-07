@@ -1,0 +1,479 @@
+{% extends "base.html" %}
+
+{% block title %}Medicine Search - HealthCare Chatbot{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1400px;">
+    <!-- Hero Search Section -->
+    <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; margin-bottom: 2rem;">
+        <div style="text-align: center; padding: 2rem 1rem;">
+            <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.9;"></i>
+            <h1 style="color: white; margin-bottom: 0.5rem;">Find Your Medicine</h1>
+            <p style="color: rgba(255,255,255,0.9); margin-bottom: 2rem;">Search from thousands of medicines with detailed information</p>
+            
+            <div style="max-width: 700px; margin: 0 auto;">
+                <div style="position: relative;">
+                    <i class="fas fa-search" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 1.25rem;"></i>
+                    <input type="text" id="medicineSearch" class="form-control" 
+                           placeholder="Search medicine name, symptoms, or category..." 
+                           style="padding: 1rem 1rem 1rem 3rem; font-size: 1.1rem; border: none; border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                </div>
+                <div style="margin-top: 1rem; display: flex; gap: 0.75rem; justify-content: center;">
+                    <button onclick="searchOnExternal('1mg')" style="background: white; color: #667eea; border: none; padding: 0.6rem 1.5rem; border-radius: 25px; cursor: pointer; font-weight: 600; transition: all 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"
+                            onmouseover="this.style.transform='translateY(-2px)'"
+                            onmouseout="this.style.transform='translateY(0)'">
+                        <i class="fas fa-external-link-alt"></i> Search on 1mg
+                    </button>
+                    <button onclick="searchOnExternal('netmeds')" style="background: white; color: #10b981; border: none; padding: 0.6rem 1.5rem; border-radius: 25px; cursor: pointer; font-weight: 600; transition: all 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"
+                            onmouseover="this.style.transform='translateY(-2px)'"
+                            onmouseout="this.style.transform='translateY(0)'">
+                        <i class="fas fa-external-link-alt"></i> Search on Netmeds
+                    </button>
+                    <button onclick="searchOnExternal('pharmeasy')" style="background: white; color: #f59e0b; border: none; padding: 0.6rem 1.5rem; border-radius: 25px; cursor: pointer; font-weight: 600; transition: all 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"
+                            onmouseover="this.style.transform='translateY(-2px)'"
+                            onmouseout="this.style.transform='translateY(0)'">
+                        <i class="fas fa-external-link-alt"></i> Search on PharmEasy
+                    </button>
+                </div>
+            </div>
+            
+            <div style="margin-top: 1.5rem; display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                <span style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.875rem;">
+                    <i class="fas fa-fire"></i> Popular: Paracetamol
+                </span>
+                <span style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.875rem;">
+                    <i class="fas fa-heartbeat"></i> Ibuprofen
+                </span>
+                <span style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.875rem;">
+                    <i class="fas fa-capsules"></i> Amoxicillin
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 280px 1fr; gap: 2rem;">
+        <!-- Sidebar Filters -->
+        <div>
+            <div class="card" style="position: sticky; top: 90px;">
+                <h3 style="margin-bottom: 1rem;"><i class="fas fa-filter"></i> Filters</h3>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <h4 style="font-size: 0.95rem; color: var(--gray-700); margin-bottom: 0.75rem;">Category</h4>
+                    <div id="categoryFilters">
+                        <label style="display: block; padding: 0.5rem; cursor: pointer; border-radius: var(--border-radius); transition: all 0.2s;" onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background='transparent'">
+                            <input type="checkbox" value="pain_relief" class="category-filter" style="margin-right: 0.5rem;"> Pain Relief
+                        </label>
+                        <label style="display: block; padding: 0.5rem; cursor: pointer; border-radius: var(--border-radius); transition: all 0.2s;" onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background='transparent'">
+                            <input type="checkbox" value="antibiotics" class="category-filter" style="margin-right: 0.5rem;"> Antibiotics
+                        </label>
+                        <label style="display: block; padding: 0.5rem; cursor: pointer; border-radius: var(--border-radius); transition: all 0.2s;" onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background='transparent'">
+                            <input type="checkbox" value="cold_flu" class="category-filter" style="margin-right: 0.5rem;"> Cold & Flu
+                        </label>
+                        <label style="display: block; padding: 0.5rem; cursor: pointer; border-radius: var(--border-radius); transition: all 0.2s;" onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background='transparent'">
+                            <input type="checkbox" value="digestive" class="category-filter" style="margin-right: 0.5rem;"> Digestive Health
+                        </label>
+                        <label style="display: block; padding: 0.5rem; cursor: pointer; border-radius: var(--border-radius); transition: all 0.2s;" onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background='transparent'">
+                            <input type="checkbox" value="heart" class="category-filter" style="margin-right: 0.5rem;"> Heart & Blood Pressure
+                        </label>
+                        <label style="display: block; padding: 0.5rem; cursor: pointer; border-radius: var(--border-radius); transition: all 0.2s;" onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background='transparent'">
+                            <input type="checkbox" value="diabetes" class="category-filter" style="margin-right: 0.5rem;"> Diabetes
+                        </label>
+                        <label style="display: block; padding: 0.5rem; cursor: pointer; border-radius: var(--border-radius); transition: all 0.2s;" onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background='transparent'">
+                            <input type="checkbox" value="vitamins" class="category-filter" style="margin-right: 0.5rem;"> Vitamins & Supplements
+                        </label>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <h4 style="font-size: 0.95rem; color: var(--gray-700); margin-bottom: 0.75rem;">Type</h4>
+                    <div>
+                        <label style="display: block; padding: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" value="tablet" class="type-filter" style="margin-right: 0.5rem;"> Tablet
+                        </label>
+                        <label style="display: block; padding: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" value="capsule" class="type-filter" style="margin-right: 0.5rem;"> Capsule
+                        </label>
+                        <label style="display: block; padding: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" value="syrup" class="type-filter" style="margin-right: 0.5rem;"> Syrup
+                        </label>
+                        <label style="display: block; padding: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" value="cream" class="type-filter" style="margin-right: 0.5rem;"> Cream/Ointment
+                        </label>
+                    </div>
+                </div>
+                
+                <button id="clearFilters" class="btn btn-secondary btn-sm" style="width: 100%;">
+                    <i class="fas fa-times"></i> Clear All Filters
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div>
+            <!-- Results Info -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div>
+                    <span id="resultCount" style="color: var(--gray-600);">Loading medicines...</span>
+                </div>
+                <div>
+                    <select id="sortBy" class="form-control" style="width: auto;">
+                        <option value="name">Sort by Name</option>
+                        <option value="category">Sort by Category</option>
+                        <option value="popularity">Sort by Popularity</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Loading State -->
+            <div id="loadingState" style="text-align: center; padding: 3rem;">
+                <div class="loading"></div>
+                <p style="color: var(--gray-500); margin-top: 1rem;">Loading medicines...</p>
+            </div>
+            
+            <!-- Medicine Grid -->
+            <div id="medicineGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; display: none;">
+                <!-- Medicine cards will be inserted here -->
+            </div>
+            
+            <!-- No Results -->
+            <div id="noResults" style="text-align: center; padding: 3rem; display: none;">
+                <i class="fas fa-search" style="font-size: 4rem; color: var(--gray-300); margin-bottom: 1rem;"></i>
+                <h3 style="color: var(--gray-600);">No medicines found</h3>
+                <p style="color: var(--gray-500);">Try adjusting your search or filters</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Medicine Detail Modal -->
+    <div id="medicineModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center;">
+        <div class="card" style="max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; position: relative;">
+            <button id="closeModal" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-500);">
+                <i class="fas fa-times"></i>
+            </button>
+            <div id="modalContent">
+                <!-- Medicine details will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let allMedicines = [];
+let filteredMedicines = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadMedicines();
+    
+    // Search functionality
+    const searchInput = document.getElementById('medicineSearch');
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            filterMedicines();
+        }, 300);
+    });
+    
+    // Category filters
+    document.querySelectorAll('.category-filter').forEach(cb => {
+        cb.addEventListener('change', filterMedicines);
+    });
+    
+    // Type filters
+    document.querySelectorAll('.type-filter').forEach(cb => {
+        cb.addEventListener('change', filterMedicines);
+    });
+    
+    // Sort
+    document.getElementById('sortBy').addEventListener('change', sortMedicines);
+    
+    // Clear filters
+    document.getElementById('clearFilters').addEventListener('click', function() {
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        searchInput.value = '';
+        filterMedicines();
+    });
+    
+    // Close modal
+    document.getElementById('closeModal').addEventListener('click', function() {
+        document.getElementById('medicineModal').style.display = 'none';
+    });
+    
+    // Close modal on outside click
+    document.getElementById('medicineModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.style.display = 'none';
+        }
+    });
+});
+
+async function loadMedicines() {
+    try {
+        const response = await fetch('/api/medicines');
+        const data = await response.json();
+        allMedicines = data.medicines;
+        filteredMedicines = allMedicines;
+        
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('medicineGrid').style.display = 'grid';
+        
+        displayMedicines(allMedicines);
+    } catch (error) {
+        console.error('Error loading medicines:', error);
+        document.getElementById('loadingState').innerHTML = '<p style="color: var(--danger-color);">Error loading medicines. Please refresh.</p>';
+    }
+}
+
+function displayMedicines(medicines) {
+    const grid = document.getElementById('medicineGrid');
+    const resultCount = document.getElementById('resultCount');
+    const noResults = document.getElementById('noResults');
+    
+    resultCount.textContent = `${medicines.length} medicines found`;
+    
+    if (medicines.length === 0) {
+        grid.style.display = 'none';
+        noResults.style.display = 'block';
+        return;
+    }
+    
+    noResults.style.display = 'none';
+    grid.style.display = 'grid';
+    
+    grid.innerHTML = medicines.map(med => `
+        <div class="medicine-card" style="background: white; border-radius: var(--border-radius-lg); overflow: hidden; box-shadow: var(--shadow-md); transition: all 0.3s; cursor: pointer; border: 2px solid transparent;"
+             onclick="showMedicineDetail('${med.id}')"
+             onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='var(--shadow-lg)'; this.style.borderColor='var(--primary-color)'"
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'; this.style.borderColor='transparent'">
+            
+            <!-- Medicine Header -->
+            <div style="background: linear-gradient(135deg, ${getCategoryColor(med.category)}); padding: 1.5rem; color: white;">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.25rem;">${med.name}</h3>
+                        <p style="margin: 0.25rem 0 0 0; opacity: 0.9; font-size: 0.875rem;">${med.manufacturer}</p>
+                    </div>
+                    <span class="badge" style="background: rgba(255,255,255,0.3);">${med.type}</span>
+                </div>
+            </div>
+            
+            <!-- Medicine Info -->
+            <div style="padding: 1.5rem;">
+                <div style="margin-bottom: 1rem;">
+                    <div style="font-size: 0.875rem; color: var(--gray-500); margin-bottom: 0.25rem;">Used for:</div>
+                    <div style="color: var(--gray-700);">${med.usage.substring(0, 100)}${med.usage.length > 100 ? '...' : ''}</div>
+                </div>
+                
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                    ${med.tags.slice(0, 3).map(tag => `<span class="badge badge-low">${tag}</span>`).join('')}
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid var(--gray-200);">
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <span class="badge badge-low" style="font-size: 0.875rem;"><i class="fas fa-box"></i> ${med.package_size}</span>
+                        <span class="badge badge-medium" style="font-size: 0.875rem;"><i class="fas fa-${getMedicineIcon(med.type)}"></i> ${med.type}</span>
+                    </div>
+                    <a href="https://www.1mg.com/search/all?name=${encodeURIComponent(med.name)}" target="_blank" 
+                       style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: var(--border-radius); cursor: pointer; text-decoration: none; font-weight: 600; transition: all 0.3s;"
+                       onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 5px 15px rgba(102, 126, 234, 0.4)'"
+                       onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'">
+                        <i class="fas fa-external-link-alt"></i> View on 1mg
+                    </a>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function getCategoryColor(category) {
+    const colors = {
+        'pain_relief': '#10b981, #059669',
+        'antibiotics': '#3b82f6, #2563eb',
+        'cold_flu': '#8b5cf6, #7c3aed',
+        'digestive': '#f59e0b, #d97706',
+        'heart': '#ef4444, #dc2626',
+        'diabetes': '#ec4899, #db2777',
+        'vitamins': '#06b6d4, #0891b2'
+    };
+    return colors[category] || '#6b7280, #4b5563';
+}
+
+function getMedicineIcon(type) {
+    const icons = {
+        'tablet': 'tablet-alt',
+        'capsule': 'capsules',
+        'syrup': 'prescription-bottle',
+        'cream': 'pump-medical',
+        'drops': 'droplet',
+        'injection': 'syringe'
+    };
+    return icons[type] || 'pill';
+}
+
+function searchOnExternal(website) {
+    const searchTerm = document.getElementById('medicineSearch').value.trim();
+    
+    if (!searchTerm) {
+        alert('Please enter a medicine name to search');
+        return;
+    }
+    
+    let url;
+    switch(website) {
+        case '1mg':
+            url = `https://www.1mg.com/search/all?name=${encodeURIComponent(searchTerm)}`;
+            break;
+        case 'netmeds':
+            url = `https://www.netmeds.com/catalogsearch/result/${encodeURIComponent(searchTerm)}/1`;
+            break;
+        case 'pharmeasy':
+            url = `https://www.pharmeasy.in/search?name=${encodeURIComponent(searchTerm)}`;
+            break;
+        default:
+            return;
+    }
+    
+    window.open(url, '_blank');
+}
+
+function filterMedicines() {
+    const searchTerm = document.getElementById('medicineSearch').value.toLowerCase();
+    const selectedCategories = Array.from(document.querySelectorAll('.category-filter:checked')).map(cb => cb.value);
+    const selectedTypes = Array.from(document.querySelectorAll('.type-filter:checked')).map(cb => cb.value);
+    
+    filteredMedicines = allMedicines.filter(med => {
+        // Search filter
+        const matchesSearch = !searchTerm || 
+            med.name.toLowerCase().includes(searchTerm) ||
+            med.usage.toLowerCase().includes(searchTerm) ||
+            med.tags.some(tag => tag.toLowerCase().includes(searchTerm)) ||
+            med.category.toLowerCase().includes(searchTerm);
+        
+        // Category filter
+        const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(med.category);
+        
+        // Type filter
+        const matchesType = selectedTypes.length === 0 || selectedTypes.includes(med.type);
+        
+        return matchesSearch && matchesCategory && matchesType;
+    });
+    
+    sortMedicines();
+}
+
+function sortMedicines() {
+    const sortBy = document.getElementById('sortBy').value;
+    
+    switch(sortBy) {
+        case 'name':
+            filteredMedicines.sort((a, b) => a.name.localeCompare(b.name));
+            break;
+        case 'category':
+            filteredMedicines.sort((a, b) => a.category.localeCompare(b.category));
+            break;
+        case 'popularity':
+            filteredMedicines.sort((a, b) => b.popularity - a.popularity);
+            break;
+    }
+    
+    displayMedicines(filteredMedicines);
+}
+
+function showMedicineDetail(medicineId) {
+    const med = allMedicines.find(m => m.id === medicineId);
+    if (!med) return;
+    
+    const modal = document.getElementById('medicineModal');
+    const content = document.getElementById('modalContent');
+    
+    content.innerHTML = `
+        <div style="background: linear-gradient(135deg, ${getCategoryColor(med.category)}); padding: 2rem; color: white; border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;">
+            <h2 style="margin: 0 0 0.5rem 0;">${med.name}</h2>
+            <p style="margin: 0; opacity: 0.9;">${med.manufacturer}</p>
+            <div style="margin-top: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                <span class="badge" style="background: rgba(255,255,255,0.3);">${med.type}</span>
+                <span class="badge" style="background: rgba(255,255,255,0.3);">${med.category.replace('_', ' ').toUpperCase()}</span>
+            </div>
+        </div>
+        
+        <div style="padding: 2rem;">
+            <div style="margin-bottom: 2rem;">
+                <h3 style="color: var(--gray-800); margin-bottom: 0.75rem;"><i class="fas fa-info-circle" style="color: var(--primary-color);"></i> Overview</h3>
+                <p style="color: var(--gray-600); line-height: 1.6;">${med.usage}</p>
+            </div>
+            
+            <div style="margin-bottom: 2rem;">
+                <h3 style="color: var(--gray-800); margin-bottom: 0.75rem;"><i class="fas fa-pills" style="color: var(--primary-color);"></i> Dosage</h3>
+                <p style="color: var(--gray-600); line-height: 1.6;">${med.dosage}</p>
+            </div>
+            
+            <div style="margin-bottom: 2rem;">
+                <h3 style="color: var(--gray-800); margin-bottom: 0.75rem;"><i class="fas fa-exclamation-triangle" style="color: var(--warning-color);"></i> Side Effects</h3>
+                <div style="background: #fef3c7; padding: 1rem; border-radius: var(--border-radius); border-left: 4px solid var(--warning-color);">
+                    <ul style="margin: 0; padding-left: 1.5rem; color: var(--gray-700);">
+                        ${med.side_effects.map(effect => `<li>${effect}</li>`).join('')}
+                    </ul>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 2rem;">
+                <h3 style="color: var(--gray-800); margin-bottom: 0.75rem;"><i class="fas fa-ban" style="color: var(--danger-color);"></i> Warnings & Precautions</h3>
+                <div style="background: #fee2e2; padding: 1rem; border-radius: var(--border-radius); border-left: 4px solid var(--danger-color);">
+                    <ul style="margin: 0; padding-left: 1.5rem; color: #991b1b;">
+                        ${med.warnings.map(warning => `<li>${warning}</li>`).join('')}
+                    </ul>
+                </div>
+            </div>
+            
+            <div style="background: #eff6ff; padding: 1.5rem; border-radius: var(--border-radius); border: 1px solid #93c5fd;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <div style="font-size: 0.875rem; color: var(--gray-500); margin-bottom: 0.5rem;">Package</div>
+                        <div style="font-size: 1.25rem; font-weight: 700; color: var(--gray-800);"><i class="fas fa-box" style="color: var(--primary-color);"></i> ${med.package_size}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.875rem; color: var(--gray-500); margin-bottom: 0.5rem;">Type</div>
+                        <div style="font-size: 1.25rem; font-weight: 700; color: var(--gray-800);"><i class="fas fa-${getMedicineIcon(med.type)}" style="color: var(--primary-color);"></i> ${med.type}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.875rem; color: var(--gray-500); margin-bottom: 0.5rem;">Storage</div>
+                        <div style="font-size: 1rem; font-weight: 600; color: var(--gray-700);"><i class="fas fa-thermometer-half" style="color: var(--warning-color);"></i> ${med.storage}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                <a href="https://www.1mg.com/search/all?name=${encodeURIComponent(med.name)}" target="_blank" 
+                   style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 1rem; border-radius: var(--border-radius); text-decoration: none; text-align: center; font-weight: 600; transition: all 0.3s;"
+                   onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(102, 126, 234, 0.4)'"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                    <i class="fas fa-external-link-alt"></i> Search on 1mg.com
+                </a>
+                <a href="https://www.netmeds.com/catalogsearch/result/${encodeURIComponent(med.name)}/1" target="_blank"
+                   style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 1rem; border-radius: var(--border-radius); text-decoration: none; text-align: center; font-weight: 600; transition: all 0.3s;"
+                   onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(16, 185, 129, 0.4)'"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                    <i class="fas fa-external-link-alt"></i> Search on Netmeds
+                </a>
+                <a href="https://www.pharmeasy.in/search?name=${encodeURIComponent(med.name)}" target="_blank"
+                   style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 1rem; border-radius: var(--border-radius); text-decoration: none; text-align: center; font-weight: 600; transition: all 0.3s;"
+                   onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(245, 158, 11, 0.4)'"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                    <i class="fas fa-external-link-alt"></i> Search on PharmEasy
+                </a>
+            </div>
+            
+            <div style="margin-top: 1.5rem; padding: 1rem; background: #fef3c7; border-radius: var(--border-radius); border-left: 4px solid var(--warning-color);">
+                <p style="margin: 0; color: #92400e; font-size: 0.875rem;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Disclaimer:</strong> Always consult a doctor before taking any medication. This information is for educational purposes only.
+                </p>
+            </div>
+        </div>
+    `;
+    
+    modal.style.display = 'flex';
+}
+</script>
+{% endblock %}

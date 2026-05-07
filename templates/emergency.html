@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('emergency') }} - HealthCare Chatbot{% endblock %}
+
+{% block content %}
+<!-- Emergency Hero -->
+<section class="emergency-hero">
+    <div class="container">
+        <i class="fas fa-ambulance"></i>
+        <h1>{{ t('emergency') }}</h1>
+        <p>In case of emergency, call these numbers immediately. Your safety is our priority.</p>
+    </div>
+</section>
+
+<div class="container">
+    <!-- Quick Emergency Actions -->
+    <div class="card" style="background: linear-gradient(135deg, #fee2e2, #fecaca); border: 2px solid var(--danger-color); margin-bottom: 2rem;">
+        <div class="card-header">
+            <i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i>
+            <h2 class="card-title" style="color: #991b1b;">Quick Emergency Actions</h2>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <a href="tel:112" class="btn btn-danger btn-lg" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <i class="fas fa-phone-alt"></i>
+                <div style="text-align: left;">
+                    <div style="font-size: 1.25rem; font-weight: 800;">112</div>
+                    <div style="font-size: 0.75rem; opacity: 0.9;">Emergency Services</div>
+                </div>
+            </a>
+            <a href="tel:108" class="btn btn-danger btn-lg" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; background-color: #dc2626;">
+                <i class="fas fa-ambulance"></i>
+                <div style="text-align: left;">
+                    <div style="font-size: 1.25rem; font-weight: 800;">108</div>
+                    <div style="font-size: 0.75rem; opacity: 0.9;">Ambulance</div>
+                </div>
+            </a>
+            <a href="tel:100" class="btn btn-danger btn-lg" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; background-color: #7c3aed;">
+                <i class="fas fa-shield-alt"></i>
+                <div style="text-align: left;">
+                    <div style="font-size: 1.25rem; font-weight: 800;">100</div>
+                    <div style="font-size: 0.75rem; opacity: 0.9;">Police</div>
+                </div>
+            </a>
+            <a href="tel:101" class="btn btn-danger btn-lg" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; background-color: #ea580c;">
+                <i class="fas fa-fire-extinguisher"></i>
+                <div style="text-align: left;">
+                    <div style="font-size: 1.25rem; font-weight: 800;">101</div>
+                    <div style="font-size: 0.75rem; opacity: 0.9;">Fire</div>
+                </div>
+            </a>
+        </div>
+    </div>
+    
+    <!-- All Helplines -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-phone-alt"></i>
+            <h2 class="card-title">Emergency Helplines</h2>
+        </div>
+        
+        <div class="emergency-grid">
+            {% for helpline in helplines %}
+            <div class="emergency-card">
+                <i class="fas fa-phone-square-alt" style="font-size: 2rem; color: var(--primary-color);"></i>
+                <h3>{{ helpline.name }}</h3>
+                <div class="number">{{ helpline.number }}</div>
+                <p style="color: var(--gray-600);">{{ helpline.description }}</p>
+                <a href="tel:{{ helpline.number }}">
+                    <i class="fas fa-phone"></i> Call Now
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- First Aid Tips -->
+    <div class="card" style="margin-top: 2rem;">
+        <div class="card-header">
+            <i class="fas fa-first-aid" style="color: var(--danger-color);"></i>
+            <h2 class="card-title">Basic First Aid Tips</h2>
+        </div>
+        
+        <div class="features-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+            <div class="card" style="border-left: 4px solid var(--danger-color);">
+                <h4 style="color: var(--danger-color); margin-bottom: 0.75rem;">
+                    <i class="fas fa-heartbeat"></i> Heart Attack
+                </h4>
+                <ul style="padding-left: 1.25rem; color: var(--gray-700);">
+                    <li>Call ambulance immediately (108)</li>
+                    <li>Make person sit or lie down comfortably</li>
+                    <li>Loosen tight clothing</li>
+                    <li>If conscious, give aspirin if available</li>
+                    <li>Keep calm and reassure the person</li>
+                </ul>
+            </div>
+            
+            <div class="card" style="border-left: 4px solid var(--warning-color);">
+                <h4 style="color: var(--warning-color); margin-bottom: 0.75rem;">
+                    <i class="fas fa-fire"></i> Burns
+                </h4>
+                <ul style="padding-left: 1.25rem; color: var(--gray-700);">
+                    <li>Cool the burn under running water</li>
+                    <li>Do not apply ice directly</li>
+                    <li>Cover with clean, dry cloth</li>
+                    <li>Do not break blisters</li>
+                    <li>Seek medical help for severe burns</li>
+                </ul>
+            </div>
+            
+            <div class="card" style="border-left: 4px solid var(--info-color);">
+                <h4 style="color: var(--info-color); margin-bottom: 0.75rem;">
+                    <i class="fas fa-cut"></i> Bleeding
+                </h4>
+                <ul style="padding-left: 1.25rem; color: var(--gray-700);">
+                    <li>Apply direct pressure on wound</li>
+                    <li>Elevate the injured area</li>
+                    <li>Use clean cloth or bandage</li>
+                    <li>Do not remove embedded objects</li>
+                    <li>Seek medical help if bleeding doesn't stop</li>
+                </ul>
+            </div>
+            
+            <div class="card" style="border-left: 4px solid var(--secondary-color);">
+                <h4 style="color: var(--secondary-color); margin-bottom: 0.75rem;">
+                    <i class="fas fa-allergies"></i> Choking
+                </h4>
+                <ul style="padding-left: 1.25rem; color: var(--gray-700);">
+                    <li>Encourage coughing if able to breathe</li>
+                    <li>Perform Heimlich maneuver if unable to breathe</li>
+                    <li>Stand behind the person</li>
+                    <li>Make a fist above the navel</li>
+                    <li>Pull inward and upward sharply</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Important Disclaimer -->
+    <div class="card" style="margin-top: 2rem; background-color: #fef3c7; border: 2px solid var(--warning-color);">
+        <div style="display: flex; align-items: flex-start; gap: 1rem;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: var(--warning-color); flex-shrink: 0;"></i>
+            <div>
+                <h3 style="color: #92400e; margin-bottom: 0.5rem;">Important Notice</h3>
+                <p style="color: #92400e; margin: 0;">
+                    In case of a medical emergency, always call the emergency services immediately. 
+                    The information provided here is for basic guidance only and should not replace professional medical advice. 
+                    If you or someone else is experiencing a life-threatening emergency, dial <strong>112</strong> or <strong>108</strong> immediately.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

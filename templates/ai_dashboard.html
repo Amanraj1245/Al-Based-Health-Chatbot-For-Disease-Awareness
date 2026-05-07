@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+
+{% block title %}AI Health Dashboard - HealthCare Chatbot{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-brain"></i>
+            <h2 class="card-title">AI Health Dashboard</h2>
+        </div>
+        
+        <p style="color: var(--gray-600); margin-bottom: 1.5rem;">
+            Advanced AI-powered health analytics and predictions based on your health data.
+        </p>
+        
+        <!-- ML Predictions Section -->
+        <div id="mlPredictions" style="display: none;">
+            <h3><i class="fas fa-chart-line"></i> AI Health Predictions</h3>
+            
+            <!-- Risk Score -->
+            <div class="card" style="background: linear-gradient(135deg, #eff6ff, #dbeafe); margin: 1rem 0;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <h4>Health Risk Score</h4>
+                        <p style="color: var(--gray-600);">Based on your symptoms and profile</p>
+                    </div>
+                    <div id="riskScoreDisplay" style="text-align: center;">
+                        <div style="font-size: 3rem; font-weight: 800;" id="riskScoreValue">--</div>
+                        <div id="riskLevel" class="badge">--</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Predicted Diseases -->
+            <div class="card" style="margin: 1rem 0;">
+                <h4><i class="fas fa-stethoscope"></i> AI Predicted Conditions</h4>
+                <div id="predictedDiseases">
+                    <p style="color: var(--gray-500);">No predictions available. Start a chat to get AI insights.</p>
+                </div>
+            </div>
+            
+            <!-- Health Trends -->
+            <div class="card" style="margin: 1rem 0;">
+                <h4><i class="fas fa-chart-area"></i> Health Trend Analysis</h4>
+                <div id="healthTrends">
+                    <p style="color: var(--gray-500);">Insufficient data for trend analysis.</p>
+                </div>
+            </div>
+            
+            <!-- Personalized Precautions -->
+            <div class="card" style="margin: 1rem 0; background: linear-gradient(135deg, #f0fdf4, #dcfce7);">
+                <h4><i class="fas fa-shield-alt"></i> AI-Recommended Precautions</h4>
+                <ul id="precautionsList" style="padding-left: 1.5rem;">
+                    <li style="color: var(--gray-500);">Start using the chatbot to get personalized precautions.</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Quick Health Check -->
+        <div class="card" style="margin-top: 2rem;">
+            <div class="card-header">
+                <i class="fas fa-heartbeat"></i>
+                <h3 class="card-title">Quick AI Health Check</h3>
+            </div>
+            
+            <form id="healthCheckForm">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Current Symptoms (comma separated)</label>
+                        <input type="text" id="symptomsInput" class="form-control" 
+                               placeholder="e.g., fever, headache, cough">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Duration (days)</label>
+                        <input type="number" id="durationInput" class="form-control" 
+                               value="1" min="1" max="30">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Severity (1-10)</label>
+                        <input type="range" id="severityInput" class="form-control" 
+                               min="1" max="10" value="5">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: var(--gray-500);">
+                            <span>Mild</span>
+                            <span id="severityValue">5</span>
+                            <span>Severe</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-lg" style="margin-top: 1rem;">
+                    <i class="fas fa-brain"></i> Get AI Analysis
+                </button>
+            </form>
+            
+            <!-- Results -->
+            <div id="aiResults" style="margin-top: 2rem; display: none;">
+                <div class="card" style="background: linear-gradient(135deg, #fef3c7, #fde68a);">
+                    <h4><i class="fas fa-robot"></i> AI Analysis Results</h4>
+                    <div id="aiResultsContent"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Health Stats -->
+        <div class="card" style="margin-top: 2rem;">
+            <div class="card-header">
+                <i class="fas fa-chart-pie"></i>
+                <h3 class="card-title">Your Health Statistics</h3>
+            </div>
+            
+            <div class="features-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                <div style="text-align: center; padding: 1.5rem; background: var(--gray-50); border-radius: var(--border-radius);">
+                    <i class="fas fa-comments" style="font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem;"></i>
+                    <div style="font-size: 2rem; font-weight: 800;" id="totalChats">0</div>
+                    <div style="color: var(--gray-600);">Total Consultations</div>
+                </div>
+                
+                <div style="text-align: center; padding: 1.5rem; background: var(--gray-50); border-radius: var(--border-radius);">
+                    <i class="fas fa-clipboard-list" style="font-size: 2rem; color: var(--secondary-color); margin-bottom: 0.5rem;"></i>
+                    <div style="font-size: 2rem; font-weight: 800;" id="symptomsTracked">0</div>
+                    <div style="color: var(--gray-600);">Symptoms Tracked</div>
+                </div>
+                
+                <div style="text-align: center; padding: 1.5rem; background: var(--gray-50); border-radius: var(--border-radius);">
+                    <i class="fas fa-brain" style="font-size: 2rem; color: var(--warning-color); margin-bottom: 0.5rem;"></i>
+                    <div style="font-size: 2rem; font-weight: 800;" id="aiInsights">0</div>
+                    <div style="color: var(--gray-600);">AI Insights</div>
+                </div>
+                
+                <div style="text-align: center; padding: 1.5rem; background: var(--gray-50); border-radius: var(--border-radius);">
+                    <i class="fas fa-heart" style="font-size: 2rem; color: var(--danger-color); margin-bottom: 0.5rem;"></i>
+                    <div style="font-size: 2rem; font-weight: 800;" id="healthScore">--</div>
+                    <div style="color: var(--gray-600);">Health Score</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Severity slider
+    const severityInput = document.getElementById('severityInput');
+    const severityValue = document.getElementById('severityValue');
+    
+    severityInput.addEventListener('input', function() {
+        severityValue.textContent = this.value;
+    });
+    
+    // Load user stats
+    loadUserStats();
+    
+    // Health check form
+    document.getElementById('healthCheckForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const symptoms = document.getElementById('symptomsInput').value.split(',').map(s => s.trim());
+        const duration = parseInt(document.getElementById('durationInput').value);
+        const severity = parseInt(document.getElementById('severityInput').value);
+        
+        try {
+            const response = await fetch('/api/ml_health_check', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    symptoms: symptoms,
+                    duration: duration,
+                    severity: severity
+                })
+            });
+            
+            const data = await response.json();
+            displayAIResults(data);
+            
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        }
+    });
+});
+
+function displayAIResults(data) {
+    const resultsDiv = document.getElementById('aiResults');
+    const contentDiv = document.getElementById('aiResultsContent');
+    
+    let html = '';
+    
+    // Risk Assessment
+    if (data.risk_assessment) {
+        const risk = data.risk_assessment;
+        const riskColor = risk.risk_level === 'critical' ? 'var(--danger-color)' : 
+                         risk.risk_level === 'high' ? '#f59e0b' :
+                         risk.risk_level === 'moderate' ? '#3b82f6' : '#10b981';
+        
+        html += `
+            <div style="margin-bottom: 1.5rem;">
+                <h5 style="color: ${riskColor}; margin-bottom: 0.5rem;">
+                    Risk Level: ${risk.risk_level.toUpperCase()}
+                </h5>
+                <p><strong>Risk Score:</strong> ${risk.risk_score}/100</p>
+                ${risk.risk_factors.length > 0 ? `
+                    <p style="margin-top: 0.5rem;"><strong>Risk Factors:</strong></p>
+                    <ul style="margin: 0.25rem 0; padding-left: 1.5rem;">
+                        ${risk.risk_factors.map(f => `<li>${f}</li>`).join('')}
+                    </ul>
+                ` : ''}
+            </div>
+        `;
+    }
+    
+    // Predicted Diseases
+    if (data.predicted_diseases && data.predicted_diseases.length > 0) {
+        html += `
+            <div style="margin-bottom: 1.5rem;">
+                <h5>AI Predicted Conditions:</h5>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+                    ${data.predicted_diseases.map(d => `
+                        <div style="padding: 0.75rem; background: white; border-radius: var(--border-radius); border-left: 4px solid var(--primary-color);">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <strong>${d.disease.replace(/_/g, ' ').toUpperCase()}</strong>
+                                <span class="badge badge-${d.severity === 'critical' ? 'high' : d.severity === 'severe' ? 'high' : 'medium'}">
+                                    ${(d.confidence * 100).toFixed(0)}% match
+                                </span>
+                            </div>
+                            <p style="font-size: 0.875rem; color: var(--gray-600); margin-top: 0.25rem;">
+                                Duration: ${d.duration} | Severity: ${d.severity}
+                            </p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    // Recommendations
+    if (data.recommendations && data.recommendations.length > 0) {
+        html += `
+            <div>
+                <h5>AI Recommendations:</h5>
+                <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                    ${data.recommendations.map(r => `<li>${r}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    contentDiv.innerHTML = html;
+    resultsDiv.style.display = 'block';
+}
+
+async function loadUserStats() {
+    try {
+        const response = await fetch('/api/user_health_stats');
+        const data = await response.json();
+        
+        if (data.total_chats !== undefined) {
+            document.getElementById('totalChats').textContent = data.total_chats;
+        }
+        if (data.symptoms_tracked !== undefined) {
+            document.getElementById('symptomsTracked').textContent = data.symptoms_tracked;
+        }
+        if (data.ai_insights !== undefined) {
+            document.getElementById('aiInsights').textContent = data.ai_insights;
+        }
+        if (data.health_score !== undefined) {
+            document.getElementById('healthScore').textContent = data.health_score;
+        }
+        
+        // Display ML predictions if available
+        if (data.ml_predictions) {
+            displayMLPredictions(data.ml_predictions);
+        }
+        
+    } catch (error) {
+        console.error('Error loading stats:', error);
+    }
+}
+
+function displayMLPredictions(predictions) {
+    const container = document.getElementById('mlPredictions');
+    container.style.display = 'block';
+    
+    // Risk Score
+    if (predictions.risk_assessment) {
+        const risk = predictions.risk_assessment;
+        document.getElementById('riskScoreValue').textContent = risk.risk_score;
+        document.getElementById('riskScoreValue').style.color = 
+            risk.risk_level === 'critical' ? 'var(--danger-color)' :
+            risk.risk_level === 'high' ? '#f59e0b' :
+            risk.risk_level === 'moderate' ? '#3b82f6' : '#10b981';
+        
+        const riskBadge = document.getElementById('riskLevel');
+        riskBadge.textContent = risk.risk_level.toUpperCase();
+        riskBadge.className = `badge badge-${risk.risk_level === 'critical' || risk.risk_level === 'high' ? 'high' : risk.risk_level === 'moderate' ? 'medium' : 'low'}`;
+    }
+    
+    // Predicted Diseases
+    if (predictions.predicted_diseases && predictions.predicted_diseases.length > 0) {
+        const diseasesHtml = predictions.predicted_diseases.map(d => `
+            <div style="padding: 0.75rem; background: var(--gray-50); border-radius: var(--border-radius); margin-bottom: 0.5rem;">
+                <div style="display: flex; justify-content: space-between;">
+                    <strong>${d.disease.replace(/_/g, ' ').toUpperCase()}</strong>
+                    <span class="badge badge-${d.severity === 'critical' || d.severity === 'severe' ? 'high' : 'medium'}">
+                        ${(d.confidence * 100).toFixed(0)}%
+                    </span>
+                </div>
+            </div>
+        `).join('');
+        document.getElementById('predictedDiseases').innerHTML = diseasesHtml;
+    }
+    
+    // Precautions
+    if (predictions.precautions && predictions.precautions.length > 0) {
+        const precautionsHtml = predictions.precautions.map(p => `<li>${p}</li>`).join('');
+        document.getElementById('precautionsList').innerHTML = precautionsHtml;
+    }
+}
+</script>
+{% endblock %}

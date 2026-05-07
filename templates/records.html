@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('records') }} - HealthCare Chatbot{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Upload Section -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <h2 class="card-title">Upload Health Record</h2>
+        </div>
+        
+        <form method="POST" action="{{ url_for('records') }}" enctype="multipart/form-data">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label class="form-label">Select File *</label>
+                    <div style="border: 2px dashed var(--gray-300); border-radius: var(--border-radius); padding: 2rem; text-align: center; background-color: var(--gray-50);">
+                        <i class="fas fa-file-medical" style="font-size: 3rem; color: var(--gray-400); margin-bottom: 1rem;"></i>
+                        <p style="color: var(--gray-600); margin-bottom: 1rem;">
+                            Drag and drop your file here, or click to browse
+                        </p>
+                        <input type="file" name="file" id="fileInput" class="form-control" required 
+                               accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+                               style="max-width: 300px; margin: 0 auto;">
+                        <p style="font-size: 0.875rem; color: var(--gray-500); margin-top: 0.5rem;">
+                            Supported formats: PDF, PNG, JPG, DOC, DOCX (Max 16MB)
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" class="form-control" rows="2" 
+                              placeholder="e.g., Blood test report, X-ray, Prescription..."></textarea>
+                </div>
+            </div>
+            
+            <div style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-upload"></i> {{ t('upload') }}
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Records List -->
+    <div class="card" style="margin-top: 2rem;">
+        <div class="card-header">
+            <i class="fas fa-folder-open"></i>
+            <h2 class="card-title">My Health Records</h2>
+        </div>
+        
+        {% if records %}
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>{{ t('file_name') }}</th>
+                        <th>{{ t('description') }}</th>
+                        <th>{{ t('upload_date') }}</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                    <tr>
+                        <td>
+                            <i class="fas fa-file" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
+                            <strong>{{ record.original_filename }}</strong>
+                        </td>
+                        <td>{{ record.description or '-' }}</td>
+                        <td>{{ record.upload_date.strftime('%d %b %Y, %I:%M %p') }}</td>
+                        <td>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <a href="{{ url_for('download_record', record_id=record.id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-download"></i> {{ t('download') }}
+                                </a>
+                                <form method="POST" action="{{ url_for('delete_record', record_id=record.id) }}" 
+                                      style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this record?');">
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i> {{ t('delete') }}
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 3rem; color: var(--gray-500);">
+            <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+            <p>{{ t('no_records') }}</p>
+            <p style="font-size: 0.875rem;">Upload your first health record above!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('fileInput');
+    const dropZone = fileInput.parentElement;
+    
+    // Drag and drop functionality
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        dropZone.style.borderColor = 'var(--primary-color)';
+        dropZone.style.backgroundColor = '#eff6ff';
+    });
+    
+    dropZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        dropZone.style.borderColor = 'var(--gray-300)';
+        dropZone.style.backgroundColor = 'var(--gray-50)';
+    });
+    
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropZone.style.borderColor = 'var(--gray-300)';
+        dropZone.style.backgroundColor = 'var(--gray-50)';
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+        }
+    });
+    
+    // Show selected filename
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            const fileName = this.files[0].name;
+            dropZone.querySelector('p').textContent = 'Selected: ' + fileName;
+            dropZone.querySelector('p').style.color = 'var(--primary-color)';
+            dropZone.querySelector('p').style.fontWeight = '600';
+        }
+    });
+});
+</script>
+{% endblock %}
